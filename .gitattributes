@@ -1,0 +1,14 @@
+# Keep LF line endings everywhere, including Windows checkouts. Most of these
+# files are read inside Linux containers, where CRLF can break them.
+* text=auto eol=lf
+
+# Binary files: never convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.pdf binary
