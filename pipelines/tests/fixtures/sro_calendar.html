@@ -1,0 +1,50 @@
+<!-- Hand-written fixture that mirrors the SRO calendar template's structure. -->
+<html><body>
+<form>
+  <select name="filter_season_id" id="filter_season_id">
+    <option value="0">Season</option><option value="12" selected='selected' >2027</option>
+    <option value="11">2026</option>
+  </select>
+</form>
+<div id="calendar" class="calendar">
+  <ul class="calendar__list-items">
+    <li class="calendar__list-item full-width">
+      <div class="calendar__date">
+        <div class="calendar__date-start">
+          <span class="calendar__date-number">02</span>
+          <span class="calendar__date-month">APR</span>
+          <span class="calendar__date-year">2027</span>
+        </div>
+        <div class="calendar__date-end">
+          <span class="calendar__date-number">04</span>
+          <span class="calendar__date-month">APR</span>
+          <span class="calendar__date-year">2027</span>
+        </div>
+      </div>
+      <div class="calendar__details">
+        <h3 class="calendar__race-header">Sonoma Raceway</h3>
+        <span class="calendar__race-text">Round 1</span>
+        <span class="calendar__race-text"></span>
+        <a class="link-button" href="/event/121/sonoma-raceway">Event Info</a>
+      </div>
+    </li>
+    <li class="calendar__list-item">
+      <div class="calendar__date">
+        <div class="calendar__date-start">
+          <span class="calendar__date-number">07</span>
+          <span class="calendar__date-month">MAY</span>
+          <span class="calendar__date-year">2027</span>
+        </div>
+      </div>
+      <div class="calendar__details">
+        <h3 class="calendar__race-header">Circuit of The Americas</h3>
+        <a class="link-button" href="/event/122/texas-8-hour">Event Info</a>
+      </div>
+    </li>
+    <li class="calendar__list-item">
+      <!-- No event link: not an event row, must be skipped. -->
+      <h3 class="calendar__race-header">Sponsor banner</h3>
+    </li>
+  </ul>
+</div>
+</body></html>

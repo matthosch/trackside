@@ -1,0 +1,26 @@
+# Secrets and local config
+.env
+
+# Raw timing data never goes in the repo (see docs/scope.md)
+data/raw/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+
+# Go
+api/trackside-api
+api/*.exe
+
+# Terraform
+.terraform/
+*.tfstate*
+
+.DS_Store

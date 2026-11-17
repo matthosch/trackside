@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}</style>
+<title>Trackside</title>
+<meta name="theme-color" content="#07080a">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;1,700;1,900&family=Barlow:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Night-race livery: carbon black, signal red, acid yellow. Slanted stripes run behind a heavy italic wordmark, a timing tower sits beside it, kerb strips divide the sections. Dark only. */
+:root {
+  --bg: #07080a;
+  --surface: #101216;
+  --ink: #f4f5f7;
+  --muted: #8a92a2;
+  --line: #262a33;
+  --accent: #ff2d1a;
+  --hot: #e4ff1a;
+  --blue: #e4ff1a;
+  --kerb-a: #ff2d1a;
+  --kerb-b: #f4f5f7;
+  --tower-bg: #000000;
+  --tower-fg: #f4f5f7;
+  --tower-line: #23262e;
+  --tower-muted: #8a92a2;
+  --purple: #c77dff;
+  --green: #2fe07a;
+  --yellow: #ffd21f;
+  --display: "Barlow Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Barlow", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --cut: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 0 100%);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg) repeating-linear-gradient(135deg, transparent 0 5px, rgb(255 255 255 / 0.018) 5px 6px); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.55; overflow-x: hidden; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); font-style: italic; margin: 0; text-wrap: balance; line-height: 0.92; }
+::selection { background: var(--hot); color: #000; }
+p { margin: 0; }
+a { color: inherit; }
+a:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.label { font-family: var(--mono); font-size: 12px; letter-spacing: 0.14em; font-weight: 700; text-transform: uppercase; color: var(--hot); }
+
+/* Hero */
+.hero { position: relative; overflow: hidden; background: #000; }
+.stripes { position: absolute; inset: 0; pointer-events: none; }
+.stripes span { position: absolute; top: -20%; height: 140%; transform: skewX(-18deg); }
+.stripes .s1 { left: 50%; width: 110px; background: var(--accent); }
+.stripes .s2 { left: calc(50% + 130px); width: 22px; background: var(--hot); }
+.stripes .s3 { left: calc(50% + 170px); width: 6px; background: var(--ink); }
+.hero .wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 56px; align-items: center; padding-block: 56px 64px; }
+.topline { display: flex; align-items: center; gap: 14px; margin-bottom: 28px; }
+.roundel { width: 46px; height: 46px; border-radius: 0; transform: skewX(-12deg); background: var(--hot); color: #000; border: 0; display: grid; place-items: center; font-family: var(--display); font-weight: 700; font-size: 24px; }
+h1 { font-weight: 900; font-size: clamp(56px, 11.5vw, 140px); letter-spacing: -0.04em; line-height: 0.82; text-transform: uppercase; }
+h1 em { font-style: inherit; color: var(--accent); }
+.lede { font-size: 21px; max-width: 30em; margin-top: 22px; }
+.lede + p { color: var(--muted); max-width: 34em; margin-top: 12px; }
+.links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.chip { font-family: var(--mono); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 9px 14px; border: 1.5px solid var(--hot); color: var(--hot); background: #000; transform: skewX(-14deg); }
+.chip > span { display: inline-block; transform: skewX(14deg); }
+.chip small { color: var(--muted); font-size: 11px; margin-left: 6px; }
+
+/* Timing tower */
+.tower { background: var(--tower-bg); color: var(--tower-fg); font-family: var(--mono); font-size: 13px; min-width: 0; border: 1px solid var(--tower-line); border-top: 4px solid var(--hot); box-shadow: 14px 14px 0 var(--accent); }
+.tower header { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; padding: 14px 16px; border-bottom: 1px solid var(--tower-line); }
+.tower header strong { font-family: var(--display); font-style: italic; font-size: 26px; font-weight: 900; letter-spacing: 0.04em; text-transform: uppercase; }
+.tower header span { color: var(--tower-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+th { text-align: left; font-weight: 500; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tower-muted); padding: 10px 10px 6px; }
+td { padding: 9px 10px; border-top: 1px solid var(--tower-line); white-space: nowrap; }
+td:first-child, th:first-child { padding-left: 16px; }
+td:last-child, th:last-child { padding-right: 16px; text-align: right; }
+.pos { display: inline-grid; place-items: center; width: 22px; height: 22px; background: var(--tower-fg); color: var(--tower-bg); font-weight: 700; }
+.car { font-family: var(--body); font-weight: 600; font-size: 14px; }
+.sec { display: inline-block; width: 26px; height: 8px; margin-right: 3px; }
+.p { background: var(--purple); } .g { background: var(--green); } .y { background: var(--yellow); }
+.tower footer { padding: 10px 16px 14px; border-top: 1px solid var(--tower-line); color: var(--tower-muted); font-size: 11px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.key i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+
+/* Kerb */
+.kerb { height: 18px; background: repeating-linear-gradient(-60deg, var(--kerb-a) 0 28px, var(--kerb-b) 28px 56px); }
+
+section .wrap { padding-block: 80px; }
+h2 { font-weight: 900; font-size: clamp(44px, 7.5vw, 88px); text-transform: uppercase; letter-spacing: -0.02em; margin-top: 10px; }
+.intro { color: var(--muted); max-width: 38em; margin-top: 14px; }
+
+.three { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; margin-top: 44px; border-top: 4px solid var(--accent); }
+.three article { padding: 24px 24px 8px 0; min-width: 0; }
+.three article + article { padding-left: 24px; border-left: 1px solid var(--line); }
+h3 { font-weight: 900; font-size: 34px; text-transform: uppercase; margin-bottom: 12px; }
+.three p { color: var(--muted); }
+
+.stays { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+.stay { background: var(--surface); border-left: 4px solid var(--accent); clip-path: var(--cut); padding: 18px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.stay b { font-family: var(--display); font-style: italic; font-size: 28px; font-weight: 900; text-transform: uppercase; line-height: 1.05; }
+.stay .row { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; margin-top: 8px; padding-top: 10px; border-top: 1px solid var(--line); color: var(--muted); }
+.stay .row span:last-child { color: var(--hot); font-weight: 700; }
+.stay .label { color: var(--muted); }
+.note { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-top: 14px; }
+
+.ops { background: var(--surface); border-block: 4px solid var(--accent); }
+.board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 48px; margin-top: 32px; }
+.board div { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 16px; padding: 14px 0; border-top: 1px solid var(--line); }
+.board dt { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); padding-top: 4px; }
+.board dd { margin: 0; }
+dl { margin: 0; }
+
+.plan { list-style: none; padding: 0; margin: 32px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; counter-reset: lap; }
+.plan li { counter-increment: lap; background: var(--surface); border-top: 4px solid var(--accent); clip-path: var(--cut); padding: 14px 16px 18px; min-width: 0; }
+.plan li::before { content: "0" counter(lap); display: block; font-family: var(--display); font-style: italic; font-weight: 900; font-size: 56px; line-height: 0.85; color: transparent; -webkit-text-stroke: 1.5px var(--accent); margin-bottom: 8px; }
+.plan li b { font-family: var(--display); font-style: italic; font-size: 26px; font-weight: 900; text-transform: uppercase; line-height: 1.1; display: block; }
+.plan li span { color: var(--muted); font-size: 15px; }
+
+.foot .wrap { padding-block: 28px 40px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; color: var(--muted); font-size: 14px; }
+
+@media (max-width: 860px) {
+  .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 40px; padding-block: 40px 52px; }
+  h1 { font-size: clamp(56px, 19vw, 150px); }
+  .stripes .s1 { left: 70%; } .stripes .s2 { left: calc(70% + 130px); } .stripes .s3 { left: calc(70% + 170px); }
+  .three, .stays, .board { grid-template-columns: minmax(0, 1fr); }
+  .three article, .three article + article { padding: 20px 0 12px; border-left: 0; }
+  .three article + article { border-top: 1px solid var(--line); }
+  .plan { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tower { box-shadow: 8px 8px 0 var(--accent); margin-right: 8px; }
+  section .wrap { padding-block: 48px; }
+}
+@media (max-width: 480px) {
+  .board div { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .stripes { opacity: 0.4; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .stripes span { animation: slide 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  .stripes .s2 { animation-delay: 0.06s; } .stripes .s3 { animation-delay: 0.12s; }
+  @keyframes slide { from { translate: 0 -30%; } to { translate: 0 0; } }
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="stripes" aria-hidden="true"><span class="s1"></span><span class="s2"></span><span class="s3"></span></div>
+  <div class="wrap">
+    <div>
+      <div class="topline"><div class="roundel" aria-hidden="true">3</div><span class="label">GT3 season companion</span></div>
+      <h1>Track<em>side</em></h1>
+      <p class="lede">Follow the GT3 season race by race. See who is quick at each circuit, and find a place to stay near it.</p>
+      <p>Built on lap-by-lap timing archives and Balance of Performance bulletins from IMSA GTD and GT World Challenge America.</p>
+      <div class="links">
+        <span class="chip"><span>App<small>soon</small></span></span>
+        <span class="chip"><span>Grafana<small>soon</small></span></span>
+        <span class="chip"><span>Airflow<small>soon</small></span></span>
+        <span class="chip"><span>GitHub<small>soon</small></span></span>
+      </div>
+    </div>
+
+    <div class="tower" role="group" aria-label="Sample pace ranking">
+      <header><strong>Road Atlanta · GTD</strong><span>Sample data</span></header>
+      <div class="scroll">
+        <table>
+          <thead><tr><th>P</th><th>Car model</th><th>Best lap</th><th>Sectors</th><th>Gap</th></tr></thead>
+          <tbody>
+            <tr><td><span class="pos">1</span></td><td class="car">Model A</td><td>1:19.412</td><td><i class="sec p"></i><i class="sec g"></i><i class="sec g"></i></td><td>—</td></tr>
+            <tr><td><span class="pos">2</span></td><td class="car">Model B</td><td>1:19.538</td><td><i class="sec g"></i><i class="sec p"></i><i class="sec y"></i></td><td>+0.126</td></tr>
+            <tr><td><span class="pos">3</span></td><td class="car">Model C</td><td>1:19.701</td><td><i class="sec g"></i><i class="sec g"></i><i class="sec p"></i></td><td>+0.289</td></tr>
+            <tr><td><span class="pos">4</span></td><td class="car">Model D</td><td>1:19.894</td><td><i class="sec y"></i><i class="sec g"></i><i class="sec g"></i></td><td>+0.482</td></tr>
+            <tr><td><span class="pos">5</span></td><td class="car">Model E</td><td>1:20.067</td><td><i class="sec g"></i><i class="sec y"></i><i class="sec y"></i></td><td>+0.655</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer>
+        <span class="key"><i class="p"></i>Best overall</span>
+        <span class="key"><i class="g"></i>Personal best</span>
+        <span class="key"><i class="y"></i>Off the pace</span>
+      </footer>
+    </div>
+  </div>
+</div>
+<div class="kerb" aria-hidden="true"></div>
+
+<section>
+  <div class="wrap">
+    <span class="label">The app</span>
+    <h2>Pick a race. Plan the weekend.</h2>
+    <div class="three">
+      <article><h3>What to watch</h3><p>Pace by car model at this circuit from previous years, and how the Balance of Performance has shifted since the last round.</p></article>
+      <article><h3>Where to stay</h3><p>Sample stays around each circuit with distance to the gate and a nightly price that climbs as race weekend gets closer.</p></article>
+      <article><h3>The calendar</h3><p>Every round in one place, re-checked on a schedule because provisional dates move.</p></article>
+    </div>
+
+    <div class="stays">
+      <div class="stay"><span class="label">Cabin · sleeps 4</span><b>Lakeside cabin near Turn 10</b><div class="row"><span>3.2 km to gate</span><span>$184 / night</span></div></div>
+      <div class="stay"><span class="label">Apartment · sleeps 2</span><b>Loft above the old mill</b><div class="row"><span>9.5 km to gate</span><span>$126 / night</span></div></div>
+      <div class="stay"><span class="label">House · sleeps 6</span><b>Farmhouse with paddock parking</b><div class="row"><span>14.1 km to gate</span><span>$243 / night</span></div></div>
+    </div>
+    <p class="note">Listings, prices, and lap times on this page are generated sample data.</p>
+  </div>
+</section>
+
+<section class="ops">
+  <div class="wrap">
+    <span class="label">Race control</span>
+    <h2>Run like a production service</h2>
+    <p class="intro">The app is the workload. Most of the engineering is in keeping its data fresh and its failures short.</p>
+    <dl class="board">
+      <div><dt>Pipeline</dt><dd>Airflow loads session time cards into Postgres, from raw files through staging to marts.</dd></div>
+      <div><dt>Stream</dt><dd>A replayer pushes archived laps through SQS as a simulated race weekend.</dd></div>
+      <div><dt>Service levels</dt><dd>API availability and latency, data freshness, data completeness, and stream lag.</dd></div>
+      <div><dt>Observability</dt><dd>Prometheus metrics, Loki logs, and Grafana dashboards, with alerts tied to the service levels.</dd></div>
+      <div><dt>Triage agent</dt><dd>When an alert fires, a read-only Claude agent gathers evidence and files a ticket with a likely root cause and a runbook link.</dd></div>
+      <div><dt>Delivery</dt><dd>Terraform on AWS, GitHub Actions for tests and deploys, then k3s with ArgoCD.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <span class="label">Run plan</span>
+    <h2>Eight stages to the flag</h2>
+    <p class="intro">The project is in planning. Nothing below is built yet.</p>
+    <ol class="plan">
+      <li><b>Calendar and stays</b><span>API, frontend, and database on Docker Compose</span></li>
+      <li><b>Timing pipeline</b><span>Airflow, pace panel, data-quality alerts</span></li>
+      <li><b>Triage agent</b><span>With fault-injection scenarios</span></li>
+      <li><b>Cloud</b><span>Terraform and automated deploys</span></li>
+      <li><b>BoP parsing</b><span>Bulletins from a manual inbox</span></li>
+      <li><b>Lap stream</b><span>Replayer through SQS</span></li>
+      <li><b>Europe</b><span>Calendar, stays, and classification</span></li>
+      <li><b>Kubernetes</b><span>k3s and ArgoCD</span></li>
+    </ol>
+  </div>
+</section>
+
+<div class="kerb" aria-hidden="true"></div>
+<div class="foot">
+  <div class="wrap"><span>Trackside is an independent portfolio project, not affiliated with any racing series or timing provider.</span><span>2026</span></div>
+</div>
+</body>
+</html>

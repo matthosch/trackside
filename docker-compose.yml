@@ -1,0 +1,107 @@
+# Local stack for stage 1. Credentials here are for local development only.
+name: trackside
+
+x-database-url: &database-url postgres://trackside:${POSTGRES_PASSWORD:-trackside}@db:5432/trackside
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: trackside
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-trackside}
+      POSTGRES_DB: trackside
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trackside -d trackside"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+
+  # One-shot: migrates, scrapes the calendar, generates stays. Rerun with
+  # `docker compose run --rm seed` to refresh the calendar and add today's prices.
+  seed:
+    build:
+      context: .
+      dockerfile: pipelines/Dockerfile
+    environment:
+      DATABASE_URL: *database-url
+      SEASON: ${SEASON:-2027}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    build: ./api
+    environment:
+      DATABASE_URL: *database-url
+    depends_on:
+      db:
+        condition: service_healthy
+      seed:
+        condition: service_completed_successfully
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:8080:80"
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.0.0
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./observability/alerts.yml:/etc/prometheus/alerts.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "127.0.0.1:9090:9090"
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.3.0
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki-data:/loki
+    restart: unless-stopped
+
+  # Ships every container's stdout to Loki, labelled by Compose service.
+  alloy:
+    image: grafana/alloy:v1.5.0
+    command: run /etc/alloy/config.alloy
+    volumes:
+      - ./observability/alloy.alloy:/etc/alloy/config.alloy:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:11.4.0
+    environment:
+      # Read-only anonymous access so dashboards can be linked without a login.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-trackside}
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/api.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+      - loki
+    ports:
+      - "127.0.0.1:3000:3000"
+    restart: unless-stopped
+
+volumes:
+  db-data:
+  prometheus-data:
+  loki-data:

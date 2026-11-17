@@ -1,0 +1,22 @@
+[project]
+name = "trackside-pipelines"
+version = "0.1.0"
+description = "Calendar scraping and synthetic stay generation for Trackside"
+requires-python = ">=3.12"
+dependencies = [
+    "beautifulsoup4>=4.12",
+    "psycopg[binary]>=3.2",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["trackside_pipelines"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
