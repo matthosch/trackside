@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { getEvent, listStays, type Circuit, type Stay } from "./api";
@@ -68,6 +68,8 @@ function StayList({ stays, circuit }: { stays: Stay[]; circuit: Circuit | null }
   const [sort, setSort] = useState<SortKey>("distance");
   const [hideBooked, setHideBooked] = useState(false);
   const [active, setActive] = useState<string | null>(null);
+  const [selected, setSelected] = useState<string | null>(null);
+  const cards = useRef(new Map<string, HTMLLIElement>());
 
   const shown = useMemo(() => {
     const list = hideBooked ? stays.filter((s) => s.available) : [...stays];
@@ -77,6 +79,33 @@ function StayList({ stays, circuit }: { stays: Stay[]; circuit: Circuit | null }
   }, [stays, sort, hideBooked]);
 
   const availableCount = stays.filter((s) => s.available).length;
+
+  // Forget a selection that the current filter hides.
+  useEffect(() => {
+    if (selected && !shown.some((s) => s.id === selected)) setSelected(null);
+  }, [shown, selected]);
+
+  // Escape clears the selection.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  /** Selected on the map: bring the card into view, focus it, and flash it. */
+  function focusCard(id: string) {
+    setSelected(id);
+    const card = cards.current.get(id);
+    if (!card) return;
+    const smooth = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    card.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "center" });
+    card.focus({ preventScroll: true });
+    card.classList.remove("flash");
+    void card.offsetWidth; // restart the animation if it is already running
+    card.classList.add("flash");
+  }
 
   return (
     <div className="stay-layout">
@@ -101,9 +130,22 @@ function StayList({ stays, circuit }: { stays: Stay[]; circuit: Circuit | null }
           {shown.map((stay) => (
             <li
               key={stay.id}
-              className={`stay${stay.available ? "" : " booked"}${stay.id === active ? " active" : ""}`}
+              ref={(el) => {
+                if (el) cards.current.set(stay.id, el);
+                else cards.current.delete(stay.id);
+              }}
+              tabIndex={-1}
+              aria-current={stay.id === selected ? "true" : undefined}
+              className={`stay${stay.available ? "" : " booked"}${stay.id === active ? " active" : ""}${
+                stay.id === selected ? " selected" : ""
+              }`}
               onMouseEnter={() => setActive(stay.id)}
               onMouseLeave={() => setActive(null)}
+              onClick={(event) => {
+                // The photo credit link keeps its own behaviour.
+                if (!(event.target as HTMLElement).closest("a")) setSelected(stay.id === selected ? null : stay.id);
+              }}
+              onAnimationEnd={(event) => event.currentTarget.classList.remove("flash")}
             >
               {stay.photo_url && (
                 <div className="photo">
@@ -131,7 +173,16 @@ function StayList({ stays, circuit }: { stays: Stay[]; circuit: Circuit | null }
           ))}
         </ul>
       </div>
-      {circuit && <StayMap circuit={circuit} stays={shown} active={active} onHover={setActive} />}
+      {circuit && (
+        <StayMap
+          circuit={circuit}
+          stays={shown}
+          active={active}
+          selected={selected}
+          onHover={setActive}
+          onSelect={focusCard}
+        />
+      )}
     </div>
   );
 }

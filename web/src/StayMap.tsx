@@ -18,6 +18,10 @@ function position(circuit: Circuit, stay: Stay): L.LatLngTuple {
   ];
 }
 
+function reducedMotion(): boolean {
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
 function pin(className: string, label: string): L.DivIcon {
   const span = document.createElement("span");
   span.className = className;
@@ -29,17 +33,24 @@ export function StayMap({
   circuit,
   stays,
   active,
+  selected,
   onHover,
+  onSelect,
 }: {
   circuit: Circuit;
   stays: Stay[];
   active: string | null;
+  selected: string | null;
   onHover: (id: string | null) => void;
+  onSelect: (id: string) => void;
 }) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<L.Map | null>(null);
   const layer = useRef<L.LayerGroup | null>(null);
   const markers = useRef(new Map<string, L.Marker>());
+  // Markers are built once per redraw; read the latest callbacks through a ref.
+  const callbacks = useRef({ onHover, onSelect });
+  callbacks.current = { onHover, onSelect };
 
   // One map per circuit.
   useEffect(() => {
@@ -76,25 +87,42 @@ export function StayMap({
       const marker = L.marker(at, {
         icon: pin(stay.available ? "pin" : "pin booked", stay.available ? `$${stay.nightly_price_usd}` : "Booked"),
         title: `${stay.title}, ${stay.distance_km.toFixed(1)} km`,
+        alt: `${stay.title}, ${stay.distance_km.toFixed(1)} km, ${stay.available ? `$${stay.nightly_price_usd}` : "booked"}`,
       })
-        .on("mouseover", () => onHover(stay.id))
-        .on("mouseout", () => onHover(null));
+        .on("mouseover", () => callbacks.current.onHover(stay.id))
+        .on("mouseout", () => callbacks.current.onHover(null))
+        .on("click", () => callbacks.current.onSelect(stay.id));
       marker.addTo(layer.current);
+      // Leaflet makes markers tabbable; let Enter and Space select them too.
+      marker.getElement()?.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          callbacks.current.onSelect(stay.id);
+        }
+      });
       markers.current.set(stay.id, marker);
     }
     map.current.fitBounds(L.latLngBounds(framed), { padding: [40, 40], maxZoom: 13 });
-    // `onHover` is a stable state setter.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [circuit, stays]);
 
-  // Highlight the stay hovered in the list.
+  // Highlight the hovered and selected stays, and lift them above their neighbours.
   useEffect(() => {
     for (const [id, marker] of markers.current) {
-      const on = id === active;
-      marker.getElement()?.classList.toggle("active", on);
-      marker.setZIndexOffset(on ? 1000 : 0);
+      const element = marker.getElement();
+      element?.classList.toggle("active", id === active);
+      element?.classList.toggle("selected", id === selected);
+      marker.setZIndexOffset(id === active ? 1100 : id === selected ? 1000 : 0);
     }
-  }, [active, stays]);
+  }, [active, selected, stays]);
+
+  // A stay selected from the list pans the map to it if it is out of view.
+  useEffect(() => {
+    const marker = selected ? markers.current.get(selected) : undefined;
+    if (!map.current || !marker) return;
+    if (!map.current.getBounds().pad(-0.1).contains(marker.getLatLng())) {
+      map.current.panTo(marker.getLatLng(), { animate: !reducedMotion() });
+    }
+  }, [selected]);
 
   return (
     <figure className="stay-map">
