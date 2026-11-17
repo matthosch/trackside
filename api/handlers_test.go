@@ -45,6 +45,8 @@ func (f *fakeStore) Event(_ context.Context, id int64) (Event, error) {
 
 func (f *fakeStore) Stays(context.Context, int64) ([]Stay, error) { return f.stays, nil }
 
+func (f *fakeStore) Pace(context.Context, int64) ([]PaceRow, error) { return []PaceRow{}, nil }
+
 func get(t *testing.T, store Store, path string) *httptest.ResponseRecorder {
 	t.Helper()
 	srv := &server{store: store, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
@@ -81,6 +83,8 @@ func TestStatusCodes(t *testing.T) {
 		{"/api/events/abc", http.StatusBadRequest},
 		{"/api/events/1/stays", http.StatusOK},
 		{"/api/events/99/stays", http.StatusNotFound},
+		{"/api/events/1/pace", http.StatusOK},
+		{"/api/events/99/pace", http.StatusNotFound},
 		{"/healthz", http.StatusOK},
 		{"/nope", http.StatusNotFound},
 	}

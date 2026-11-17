@@ -1,0 +1,8 @@
+# Airflow with the Trackside pipeline package installed. Build context is the repo root.
+FROM apache/airflow:3.3.2-python3.12
+
+COPY --chown=airflow:root pipelines/pyproject.toml /opt/trackside/pyproject.toml
+COPY --chown=airflow:root pipelines/trackside_pipelines /opt/trackside/trackside_pipelines
+RUN pip install --no-cache-dir /opt/trackside "apache-airflow==3.3.2"
+
+COPY --chown=airflow:root pipelines/dags /opt/airflow/dags

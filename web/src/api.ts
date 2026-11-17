@@ -46,6 +46,20 @@ async function get<T>(path: string, signal: AbortSignal): Promise<T> {
   return response.json();
 }
 
+export interface PaceRow {
+  source: string;
+  source_name: string;
+  season: number;
+  model: string;
+  rank: number;
+  cars: number;
+  best_lap_ms: number;
+  best_gap_ms: number;
+  race_pace_ms: number | null;
+  race_gap_ms: number | null;
+}
+
 export const listEvents = (signal: AbortSignal) => get<RaceEvent[]>("/api/events", signal);
 export const getEvent = (id: string, signal: AbortSignal) => get<RaceEvent>(`/api/events/${id}`, signal);
 export const listStays = (id: string, signal: AbortSignal) => get<Stay[]>(`/api/events/${id}/stays`, signal);
+export const listPace = (id: string, signal: AbortSignal) => get<PaceRow[]>(`/api/events/${id}/pace`, signal);

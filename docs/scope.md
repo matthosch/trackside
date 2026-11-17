@@ -27,7 +27,7 @@ Out of scope: accounts, fly-vs-drive comparison, airfare, car rental, routing, w
 
 | Dataset | Source | Notes |
 |---|---|---|
-| Lap-by-lap timing (core) | Al Kamel CSV archives: IMSA GTD/GTD Pro (`imsa.results.alkamelcloud.com`, 2016–2026) and GT World Challenge America (`usac.alkamelsystems.com`, 2023–2026) | Same file family on both hosts. `;`-delimited, UTF-8 BOM. Filenames are inconsistent, so discover links from the listing pages instead of constructing URLs. |
+| Lap-by-lap timing (core) | Al Kamel CSV archives: IMSA GTD/GTD Pro (`imsa.results.alkamelcloud.com`, 2016–2026) and GT World Challenge America (`usac.alkamelsystems.com`, 2023–2026) | Same file family on both hosts from 2025 (IMSA throughout). `;`-delimited, UTF-8 BOM. Filenames are inconsistent, so discover links from the listing pages instead of constructing URLs. GT World Challenge America 2024 and earlier use a different layout (`6 - Laps CSV.csv`) and need their own parser. |
 | BoP bulletins | IMSA technical bulletin PDFs | imsa.com is behind a bot challenge, so bulletins are downloaded by hand into a drop folder. The pipeline parses what lands there and alerts when an event has none. |
 | Calendars | SRO and IMSA series sites (HTML) | 2027 calendars are published and provisional. |
 | Stays | Seeded generator, snapshotted daily | Synthetic. |

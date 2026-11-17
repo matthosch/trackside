@@ -76,6 +76,27 @@ section { margin-top: 64px; }
 .rounds a:hover .round { color: var(--ink); -webkit-text-stroke-color: var(--ink); }
 .rounds a:hover .what > span, .rounds a:hover .count { color: rgb(255 255 255 / 0.75); }
 
+/* What to watch: a timing tower */
+.pace-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.pace-tabs button { font: inherit; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); background: transparent; border: 1.5px solid var(--line); padding: 7px 12px; transform: skewX(-14deg); cursor: pointer; }
+.pace-tabs button span { display: inline-block; transform: skewX(14deg); }
+.pace-tabs button:hover { color: var(--ink); border-color: var(--ink); }
+.pace-tabs button.on { background: var(--hot); border-color: var(--hot); color: #000; }
+.pace-tabs button:focus-visible { outline: 3px solid var(--hot); outline-offset: 3px; }
+.tower { background: #000; border: 1px solid var(--line); border-top: 4px solid var(--hot); box-shadow: 10px 10px 0 var(--accent-deep); max-width: 920px; }
+.tower .scroll { overflow-x: auto; }
+.tower table { border-collapse: collapse; width: 100%; font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.tower th { text-align: left; font-weight: 500; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 12px 12px 8px; }
+.tower td { padding: 9px 12px; border-top: 1px solid var(--line); white-space: nowrap; }
+.tower td:first-child, .tower th:first-child { padding-left: 16px; }
+.tower .pos { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 4px; background: var(--ink); color: #000; font-weight: 700; }
+.tower tr:first-child .pos { background: var(--hot); }
+.tower .car { font-family: var(--display); font-style: italic; font-weight: 900; font-size: 19px; text-transform: uppercase; letter-spacing: 0.01em; }
+.tower .gap { width: 30%; min-width: 150px; }
+.tower .gap span { display: inline-block; min-width: 4.5em; }
+.tower .gap i { display: inline-block; height: 6px; vertical-align: middle; background: var(--accent); max-width: calc(100% - 5em); }
+.pace-note { color: var(--muted); font-size: 14px; margin-top: 18px; max-width: 46em; }
+
 /* Stays */
 .stay-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 46%); gap: 28px; align-items: start; }
 .controls { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 16px; }

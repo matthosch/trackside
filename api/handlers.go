@@ -22,6 +22,7 @@ func (s *server) routes() http.Handler {
 	mux.HandleFunc("GET /api/events", s.listEvents)
 	mux.HandleFunc("GET /api/events/{id}", s.getEvent)
 	mux.HandleFunc("GET /api/events/{id}/stays", s.listStays)
+	mux.HandleFunc("GET /api/events/{id}/pace", s.listPace)
 	return instrument(s.log, mux)
 }
 

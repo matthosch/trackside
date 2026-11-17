@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { getEvent, listStays, type Circuit, type Stay } from "./api";
 import { countdown, formatRange } from "./dates";
+import { PacePanel } from "./PacePanel";
 import { StayMap } from "./StayMap";
 import { useFetch } from "./useFetch";
 
@@ -43,7 +44,7 @@ export function EventPage() {
 
       <section>
         <h2>What to watch</h2>
-        <p className="state">Pace by car model and Balance of Performance changes arrive with the timing pipeline.</p>
+        <PacePanel eventId={id} />
       </section>
 
       <section>

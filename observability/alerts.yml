@@ -31,3 +31,49 @@ groups:
           severity: ticket
         annotations:
           summary: API p95 latency has been above 500 ms for 10 minutes.
+
+  - name: pipelines
+    rules:
+      # Both pipelines run daily, so 30 hours means a whole run was missed or failed.
+      - alert: PipelineStale
+        expr: time() - trackside_pipeline_last_success_timestamp_seconds > 30 * 3600
+        for: 10m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Pipeline {{ $labels.pipeline }} has not succeeded for {{ $value | humanizeDuration }}."
+          runbook: docs/runbooks/pipeline-stale.md
+
+      - alert: DataQualityCheckFailing
+        expr: trackside_dq_check_status == 2
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Data-quality check {{ $labels.check }} is failing for {{ $labels.pipeline }}."
+          runbook: docs/runbooks/data-quality.md
+
+      - alert: AirflowTaskFailures
+        expr: increase(airflow_ti_failures_total[1h]) > 0
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Airflow task instances failed in the last hour."
+          runbook: docs/runbooks/pipeline-stale.md
+
+      - alert: AirflowSchedulerDown
+        expr: rate(airflow_scheduler_heartbeat_total[5m]) == 0 or absent(airflow_scheduler_heartbeat_total)
+        for: 5m
+        labels:
+          severity: page
+        annotations:
+          summary: The Airflow scheduler has stopped heartbeating, so no pipeline will run.
+          runbook: docs/runbooks/pipeline-stale.md
+
+      - alert: AirflowDagImportErrors
+        expr: airflow_dag_import_errors > 0
+        for: 5m
+        labels:
+          severity: ticket
+        annotations:
+          summary: "{{ $value }} DAG files fail to import, so their pipelines will not run."
+          runbook: docs/runbooks/pipeline-stale.md
