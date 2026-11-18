@@ -47,6 +47,10 @@ func (f *fakeStore) Stays(context.Context, int64) ([]Stay, error) { return f.sta
 
 func (f *fakeStore) Pace(context.Context, int64) ([]PaceRow, error) { return []PaceRow{}, nil }
 
+func (f *fakeStore) Drivers(context.Context, int64) ([]DriverRow, error) { return []DriverRow{}, nil }
+
+func (f *fakeStore) Entries(context.Context, int64) ([]EntryRow, error) { return []EntryRow{}, nil }
+
 func get(t *testing.T, store Store, path string) *httptest.ResponseRecorder {
 	t.Helper()
 	srv := &server{store: store, log: slog.New(slog.NewTextHandler(io.Discard, nil))}
@@ -85,6 +89,10 @@ func TestStatusCodes(t *testing.T) {
 		{"/api/events/99/stays", http.StatusNotFound},
 		{"/api/events/1/pace", http.StatusOK},
 		{"/api/events/99/pace", http.StatusNotFound},
+		{"/api/events/1/drivers", http.StatusOK},
+		{"/api/events/99/drivers", http.StatusNotFound},
+		{"/api/events/1/teams", http.StatusOK},
+		{"/api/events/x/teams", http.StatusBadRequest},
 		{"/healthz", http.StatusOK},
 		{"/nope", http.StatusNotFound},
 	}

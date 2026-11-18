@@ -54,8 +54,10 @@ Al Kamel archives ──discover──▶ raw.timing_files (manifest)
 - **Idempotent steps:** every step keeps its state in the database, so any step can be
   retried alone and reruns pick up where the last one stopped.
 - **Pace:** a lap counts only if it was green-flag, not a pit in- or out-lap, not lap 1, and
-  not implausibly fast. Race pace is the mean of the 10 fastest valid race laps for each
-  car model's best car. The SQL is in `db/migrations/005_timing_marts.sql`.
+  not implausibly fast. Race pace is the mean of the 10 fastest valid race laps. The panel
+  ranks drivers (on their own laps) and teams (each car, all its drivers) within their class,
+  and car models across the field. The SQL is in `db/migrations/005_timing_marts.sql` and
+  `007_driver_and_entry_marts.sql`.
 - **Data quality:** seven checks run after each load (`pipelines/trackside_pipelines/quality.py`).
   A failing check does not fail the run; it fires the `DataQualityCheckFailing` alert, so
   data problems and pipeline outages stay distinguishable.

@@ -58,6 +58,8 @@ type Store interface {
 	Event(ctx context.Context, id int64) (Event, error)
 	Stays(ctx context.Context, eventID int64) ([]Stay, error)
 	Pace(ctx context.Context, eventID int64) ([]PaceRow, error)
+	Drivers(ctx context.Context, eventID int64) ([]DriverRow, error)
+	Entries(ctx context.Context, eventID int64) ([]EntryRow, error)
 }
 
 type pgStore struct{ pool *pgxpool.Pool }

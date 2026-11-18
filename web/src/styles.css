@@ -95,6 +95,23 @@ section { margin-top: 64px; }
 .tower .gap { width: 30%; min-width: 150px; }
 .tower .gap span { display: inline-block; min-width: 4.5em; }
 .tower .gap i { display: inline-block; height: 6px; vertical-align: middle; background: var(--accent); max-width: calc(100% - 5em); }
+.pace-views { display: flex; gap: 0; margin-bottom: 14px; border-bottom: 2px solid var(--line); }
+.pace-views button { font: inherit; font-family: var(--display); font-style: italic; font-weight: 900; font-size: 22px; text-transform: uppercase; letter-spacing: 0.01em; color: var(--muted); background: none; border: 0; border-bottom: 4px solid transparent; margin-bottom: -2px; padding: 4px 16px 6px 0; margin-right: 12px; cursor: pointer; }
+.pace-views button:hover { color: var(--ink); }
+.pace-views button.on { color: var(--ink); border-bottom-color: var(--accent); }
+.pace-views button:focus-visible, .pace-classes button:focus-visible, .pace-more:focus-visible { outline: 3px solid var(--hot); outline-offset: 3px; }
+.pace-classes { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 16px; }
+.pace-classes button { font: inherit; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: var(--surface); border: 0; border-left: 3px solid var(--line); padding: 5px 10px; cursor: pointer; }
+.pace-classes button:hover { color: var(--ink); }
+.pace-classes button.on { color: var(--ink); border-left-color: var(--accent); background: var(--surface-2); }
+.tower .who { white-space: normal; min-width: 200px; }
+.tower .who b { display: block; font-family: var(--display); font-style: italic; font-weight: 900; font-size: 19px; text-transform: uppercase; letter-spacing: 0.01em; line-height: 1.1; }
+.tower .who .sub { display: block; font-size: 11.5px; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+.tower .num { font-style: normal; font-family: var(--mono); font-weight: 700; font-size: 0.75em; color: #000; background: var(--hot); padding: 1px 5px; margin-right: 4px; vertical-align: 1px; }
+.tower .who .sub .num { font-size: 10.5px; }
+.tower .model { color: var(--muted); font-size: 12px; white-space: normal; min-width: 140px; }
+.pace-more { display: block; width: 100%; font: inherit; font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); background: none; border: 0; border-top: 1px solid var(--line); padding: 12px; cursor: pointer; }
+.pace-more:hover { color: var(--hot); }
 .pace-note { color: var(--muted); font-size: 14px; margin-top: 18px; max-width: 46em; }
 
 /* Stays */
@@ -160,6 +177,18 @@ section { margin-top: 64px; }
   .rounds .round { font-size: 44px; grid-row: span 2; }
   .rounds .when { grid-column: 2; text-align: left; flex-direction: row; gap: 14px; }
   .live { display: none; }
+}
+/* Phones: drop the car column so lap times fit without sideways scrolling. */
+@media (max-width: 600px) {
+  .tower .model { display: none; }
+  .tower .who { min-width: 0; }
+  .tower .who b { font-size: 16px; }
+  .tower table { font-size: 12px; }
+  .tower td, .tower th { padding-left: 6px; padding-right: 6px; }
+  .tower td:first-child, .tower th:first-child { padding-left: 10px; }
+  .tower .gap { width: auto; min-width: 0; }
+  .tower .gap span { min-width: 0; }
+  .tower .gap i { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }

@@ -63,3 +63,39 @@ export const listEvents = (signal: AbortSignal) => get<RaceEvent[]>("/api/events
 export const getEvent = (id: string, signal: AbortSignal) => get<RaceEvent>(`/api/events/${id}`, signal);
 export const listStays = (id: string, signal: AbortSignal) => get<Stay[]>(`/api/events/${id}/stays`, signal);
 export const listPace = (id: string, signal: AbortSignal) => get<PaceRow[]>(`/api/events/${id}/pace`, signal);
+
+export interface DriverRow {
+  source: string;
+  source_name: string;
+  season: number;
+  class: string;
+  driver: string;
+  team: string;
+  car_number: string;
+  model: string;
+  rank: number;
+  valid_laps: number;
+  best_lap_ms: number;
+  best_gap_ms: number;
+  race_pace_ms: number | null;
+  race_gap_ms: number | null;
+}
+
+export interface EntryRow {
+  source: string;
+  source_name: string;
+  season: number;
+  class: string;
+  car_number: string;
+  team: string;
+  model: string;
+  drivers: string[];
+  rank: number;
+  best_lap_ms: number;
+  best_gap_ms: number;
+  race_pace_ms: number | null;
+  race_gap_ms: number | null;
+}
+
+export const listDrivers = (id: string, signal: AbortSignal) => get<DriverRow[]>(`/api/events/${id}/drivers`, signal);
+export const listTeams = (id: string, signal: AbortSignal) => get<EntryRow[]>(`/api/events/${id}/teams`, signal);

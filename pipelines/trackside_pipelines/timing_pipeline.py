@@ -199,3 +199,5 @@ def refresh_marts(conn: psycopg.Connection) -> None:
     with conn.transaction():
         conn.execute("REFRESH MATERIALIZED VIEW marts.lap_quality")
         conn.execute("REFRESH MATERIALIZED VIEW marts.circuit_pace")
+        conn.execute("REFRESH MATERIALIZED VIEW marts.driver_pace")
+        conn.execute("REFRESH MATERIALIZED VIEW marts.entry_pace")
