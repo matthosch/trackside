@@ -62,6 +62,9 @@ h1 em { font-style: inherit; color: var(--accent); }
 .chip { font-family: var(--mono); font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 9px 14px; border: 1.5px solid var(--hot); color: var(--hot); background: #000; transform: skewX(-14deg); }
 .chip > span { display: inline-block; transform: skewX(14deg); }
 .chip small { color: var(--muted); font-size: 11px; margin-left: 6px; }
+a.chip { text-decoration: none; transition: background 0.15s, color 0.15s; }
+a.chip:hover { background: var(--hot); color: #000; }
+a.chip:hover small { color: #000; }
 
 /* Timing tower */
 .tower { background: var(--tower-bg); color: var(--tower-fg); font-family: var(--mono); font-size: 13px; min-width: 0; border: 1px solid var(--tower-line); border-top: 4px solid var(--hot); box-shadow: 14px 14px 0 var(--accent); }
@@ -154,7 +157,7 @@ dl { margin: 0; }
         <span class="chip"><span>App<small>local</small></span></span>
         <span class="chip"><span>Grafana<small>local</small></span></span>
         <span class="chip"><span>Airflow<small>local</small></span></span>
-        <span class="chip"><span>GitHub<small>soon</small></span></span>
+        <a class="chip" href="https://github.com/matthosch/trackside"><span>GitHub<small>repo ↗</small></span></a>
       </div>
     </div>
 
