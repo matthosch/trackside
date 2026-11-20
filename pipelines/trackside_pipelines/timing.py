@@ -53,9 +53,19 @@ def parse_time_ms(value: str) -> int | None:
     return round(total * 1000)
 
 
+PARSER_VERSION = 2
+"""Bump whenever parsing changes what lands in staging. The load step reprocesses
+every file stamped with an older version, so the fix backfills itself.
+
+    1  initial parser
+    2  keep leading zeros in car numbers (#023 and #23 are different cars)
+"""
+
+
 def car_number(value: str) -> str:
-    """IMSA lap files pad numbers ('021'), results files do not ('21')."""
-    return value.strip().lstrip("0") or "0"
+    """Leading zeros are significant: IMSA's #023 and #23 are different cars.
+    Lap and results files write each number the same way, so only trim spaces."""
+    return value.strip()
 
 
 def normalise_class(value: str) -> str:

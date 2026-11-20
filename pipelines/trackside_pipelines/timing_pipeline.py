@@ -24,6 +24,7 @@ def discover(conn: psycopg.Connection, seasons: list[int], today: date | None = 
     The current season is always relisted, since sessions keep appearing.
     """
     today = today or date.today()
+    prune(conn)
     circuits = conn.execute("SELECT id, name, aliases FROM circuits").fetchall()
     settled = {
         (source, season, event)
@@ -51,6 +52,33 @@ def discover(conn: psycopg.Connection, seasons: list[int], today: date | None = 
                 new_files += _record(conn, sessions, circuit_id)
                 log.info("%s %d %s: %d sessions", source.id, season, event_value, len(sessions))
     return new_files
+
+
+def prune(conn: psycopg.Connection) -> int:
+    """Drop manifest files and staged sessions that the current scope rules reject,
+    so narrowing a rule (e.g. skipping shared series folders) cleans up after itself.
+    Returns the number of sessions removed; their laps and entries cascade."""
+    removed = 0
+    with conn.transaction():
+        for source in alkamel.SOURCES.values():
+            folders = [
+                folder for (folder,) in conn.execute(
+                    """SELECT series_folder FROM staging.sessions WHERE source = %(s)s
+                       UNION SELECT series_folder FROM raw.timing_files WHERE source = %(s)s""",
+                    {"s": source.id},
+                )
+                if not source.series_matches(folder)
+            ]
+            if not folders:
+                continue
+            removed += conn.execute(
+                "DELETE FROM staging.sessions WHERE source = %s AND series_folder = ANY(%s)", (source.id, folders)
+            ).rowcount
+            conn.execute(
+                "DELETE FROM raw.timing_files WHERE source = %s AND series_folder = ANY(%s)", (source.id, folders)
+            )
+            log.info("pruned %s series folders no longer in scope: %s", source.id, folders)
+    return removed
 
 
 def _record(conn: psycopg.Connection, sessions: list[alkamel.SessionFiles], circuit_id: str) -> int:
@@ -124,11 +152,14 @@ def download(conn: psycopg.Connection, raw_dir: Path, limit: int | None = None) 
 
 
 def load(conn: psycopg.Connection) -> tuple[int, int]:
-    """Parse fetched files into staging for every session with something new.
+    """Parse fetched files into staging for every session with something new:
+    a file not loaded yet, or one loaded or rejected by an older parser version.
 
     A session is reloaded whole (laps and entries) from its most final files.
+    A file that failed to parse is retried only once the parser version changes.
     Returns (sessions loaded, sessions with errors).
     """
+    version = timing.PARSER_VERSION
     sessions = conn.execute(
         """
         SELECT s.id, s.source, s.season, s.event_folder, s.series_folder, s.session_folder
@@ -137,10 +168,12 @@ def load(conn: psycopg.Connection) -> tuple[int, int]:
             SELECT 1 FROM raw.timing_files f
             WHERE (f.source, f.season, f.event_folder, f.series_folder, f.session_folder)
                 = (s.source, s.season, s.event_folder, s.series_folder, s.session_folder)
-              AND f.fetched_at IS NOT NULL AND f.loaded_at IS NULL AND f.load_error IS NULL
+              AND f.fetched_at IS NOT NULL
+              AND (f.parser_version IS DISTINCT FROM %s OR (f.loaded_at IS NULL AND f.load_error IS NULL))
         )
         ORDER BY s.id
-        """
+        """,
+        (version,),
     ).fetchall()
     loaded = errors = 0
     for session_id, source, season, event, series, session in sessions:
@@ -164,8 +197,13 @@ def load(conn: psycopg.Connection) -> tuple[int, int]:
         except (timing.SchemaError, OSError) as error:
             log.warning("session %s failed to parse: %s", session_id, error)
             with conn.transaction():
-                for file_id, _ in by_kind.values():
-                    conn.execute("UPDATE raw.timing_files SET load_error = %s WHERE id = %s", (str(error), file_id))
+                # Not retried until a fix bumps PARSER_VERSION.
+                conn.execute(
+                    """UPDATE raw.timing_files SET load_error = %s, loaded_at = NULL, parser_version = %s
+                       WHERE (source, season, event_folder, series_folder, session_folder) = (%s, %s, %s, %s, %s)
+                         AND fetched_at IS NOT NULL""",
+                    (str(error), version, source, season, event, series, session),
+                )
             errors += 1
             continue
 
@@ -188,8 +226,12 @@ def load(conn: psycopg.Connection) -> tuple[int, int]:
                 for e in entries:
                     copy.write_row((session_id, e.car_number, e.class_, e.team, e.vehicle))
             cur.execute(
-                "UPDATE raw.timing_files SET loaded_at = now() WHERE id = ANY(%s)",
-                ([file_id for file_id, _ in by_kind.values()],),
+                # Every file of the session, superseded ones included, is now accounted
+                # for; otherwise an old Provisional file would trigger a reload every run.
+                """UPDATE raw.timing_files SET loaded_at = now(), load_error = NULL, parser_version = %s
+                   WHERE (source, season, event_folder, series_folder, session_folder) = (%s, %s, %s, %s, %s)
+                     AND fetched_at IS NOT NULL""",
+                (version, source, season, event, series, session),
             )
         loaded += 1
     return loaded, errors

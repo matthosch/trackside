@@ -23,6 +23,15 @@ def test_only_sessions_of_the_series_in_scope():
     assert all("WeatherTech" in s.series_folder for s in found.values())
 
 
+def test_sro_skips_sessions_shared_with_other_series():
+    # Shared test days list GT World Challenge cars as "163C" next to GT America's
+    # "013A", so the same car would show up under two numbers.
+    matches = alkamel.SOURCES["sro_america"].series_matches
+    assert matches("01_GT World Challenge America powered by AWS")
+    assert not matches("07_GT World Challenge America powered by AWS - GT America powered by AWS")
+    assert not matches("03_GT America powered by AWS")
+
+
 def test_session_metadata():
     race = sessions()["Race"]
     assert race.season == 2025

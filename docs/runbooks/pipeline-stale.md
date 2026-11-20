@@ -1,6 +1,7 @@
 # Runbook: a pipeline is stale or failing
 
-Covers `PipelineStale`, `AirflowTaskFailures`, `AirflowSchedulerDown`, and `AirflowDagImportErrors`.
+Covers `PipelineStale`, `PipelineMetricsMissing`, `AirflowTaskFailures`, `AirflowSchedulerDown`,
+and `AirflowDagImportErrors`.
 
 ## What it means
 
@@ -39,6 +40,8 @@ new race sessions do not appear in the pace panel.
 | `CalendarParseError` in `refresh_calendar` | The series site changed its calendar layout | Update `sro_calendar.py` and its fixture, then rerun. |
 | Connection refused to `db` | The app database is down | Fix the database first; the pipeline needs no change. |
 | Task killed with no Python error | Out of memory on the host | Check host memory; long-race time cards are the largest files. |
+| `URLError: Name or service not known`, or a task failed for missed heartbeats with long gaps in its log | The host slept (a laptop) and DNS was not back on wake | Fetches retry three times with backoff; if all three fail, clear the task once the network is back. |
+| `PipelineMetricsMissing`, no failed task | The Pushgateway lost its stored metrics, or the pipeline has never succeeded | Check `docker compose logs pushgateway` for persistence errors, then trigger the pipeline to push a fresh timestamp. |
 
 ## After fixing
 

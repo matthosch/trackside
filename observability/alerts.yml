@@ -44,6 +44,19 @@ groups:
           summary: "Pipeline {{ $labels.pipeline }} has not succeeded for {{ $value | humanizeDuration }}."
           runbook: docs/runbooks/pipeline-stale.md
 
+      # PipelineStale needs a timestamp to compare against. If the series is gone
+      # (never pushed, or the Pushgateway lost it), say so rather than stay quiet.
+      - alert: PipelineMetricsMissing
+        expr: |
+          absent(trackside_pipeline_last_success_timestamp_seconds{pipeline="calendar_and_stays"})
+          or absent(trackside_pipeline_last_success_timestamp_seconds{pipeline="timing_archive"})
+        for: 2h
+        labels:
+          severity: ticket
+        annotations:
+          summary: "Pipeline {{ $labels.pipeline }} has no last-success metric, so staleness cannot be judged."
+          runbook: docs/runbooks/pipeline-stale.md
+
       - alert: DataQualityCheckFailing
         expr: trackside_dq_check_status == 2
         labels:

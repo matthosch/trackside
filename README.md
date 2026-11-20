@@ -53,6 +53,11 @@ Al Kamel archives ──discover──▶ raw.timing_files (manifest)
   America for 2025–2026, only at circuits on the Trackside calendar.
 - **Idempotent steps:** every step keeps its state in the database, so any step can be
   retried alone and reruns pick up where the last one stopped.
+- **Self-healing backfills:** each loaded file is stamped with the parser version
+  (`PARSER_VERSION` in `timing.py`). Bumping it after a parser fix makes the next run
+  reprocess every older file from the private raw copies, without downloading anything again.
+  Discovery also prunes staged data that the current scope rules reject. Fixes ship as
+  code, never as hand-written data migrations.
 - **Pace:** a lap counts only if it was green-flag, not a pit in- or out-lap, not lap 1, and
   not implausibly fast. Race pace is the mean of the 10 fastest valid race laps. The panel
   ranks drivers (on their own laps) and teams (each car, all its drivers) within their class,
@@ -68,6 +73,7 @@ Al Kamel archives ──discover──▶ raw.timing_files (manifest)
 |---|---|
 | `ApiDown`, `ApiHighErrorRatio`, `ApiSlowRequests` | The API is down, erroring, or slow |
 | `PipelineStale` | A pipeline has not succeeded for 30 hours |
+| `PipelineMetricsMissing` | A pipeline's last-success metric is absent, so staleness cannot be judged |
 | `DataQualityCheckFailing` | A data-quality check fails |
 | `AirflowTaskFailures` | Any Airflow task failed in the last hour |
 | `AirflowSchedulerDown` | The scheduler stops heartbeating |

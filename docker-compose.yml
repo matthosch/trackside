@@ -165,6 +165,11 @@ services:
   pushgateway:
     image: prom/pushgateway:v1.11.3
     restart: unless-stopped
+    # Without a file, a restart forgets every pipeline's last success, and
+    # PipelineStale goes quiet instead of firing.
+    command: ["--persistence.file=/pushgateway/metrics.db", "--persistence.interval=1m"]
+    volumes:
+      - pushgateway-data:/pushgateway
 
   prometheus:
     image: prom/prometheus:v3.0.0
@@ -219,4 +224,5 @@ volumes:
   # Private copies of downloaded timing files. Never committed or served.
   raw-data:
   prometheus-data:
+  pushgateway-data:
   loki-data:

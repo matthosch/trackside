@@ -26,8 +26,8 @@ def _throttle() -> None:
         _last_request = time.monotonic()
 
 
-def get(url: str, timeout: float = 60) -> bytes:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+def get(url: str, timeout: float = 60, user_agent: str = USER_AGENT) -> bytes:
+    request = urllib.request.Request(url, headers={"User-Agent": user_agent})
     for attempt in range(1, RETRIES + 1):
         _throttle()
         try:

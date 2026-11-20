@@ -7,13 +7,14 @@ selector on the page instead of being assumed.
 
 import logging
 import re
-import urllib.request
 from dataclasses import dataclass
 from datetime import date, datetime
 from urllib.parse import urljoin
 
 import psycopg
 from bs4 import BeautifulSoup, Tag
+
+from . import fetch as http
 
 log = logging.getLogger(__name__)
 
@@ -38,9 +39,9 @@ class CalendarEvent:
 
 
 def fetch(url: str, timeout: float = 30) -> str:
-    request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(request, timeout=timeout) as response:
-        return response.read().decode("utf-8", errors="replace")
+    # Shares the timing pipeline's throttle and retries: one DNS blip after a
+    # laptop wakes used to fail the whole calendar refresh.
+    return http.get(url, timeout=timeout, user_agent=USER_AGENT).decode("utf-8", errors="replace")
 
 
 def season_ids(html: str) -> dict[int, str]:

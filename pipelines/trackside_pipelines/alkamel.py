@@ -38,7 +38,9 @@ SOURCES = {
         id="sro_america",
         base_url="https://usac.alkamelsystems.com/",
         extra_params={"series": "06_SRO"},
-        series_matches=lambda folder: "GT World Challenge America" in folder,
+        # " - " marks a session shared with another series (e.g. GT America test
+        # days), where car numbers carry a series suffix such as "163C".
+        series_matches=lambda folder: "GT World Challenge America" in folder and " - " not in folder,
         # Shared sessions can carry GT America (SRO3, GT2), GT4, and one-make cars.
         classes=frozenset({"PRO", "PRO-AM", "AM"}),
     ),

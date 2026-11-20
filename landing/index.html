@@ -70,16 +70,15 @@ h1 em { font-style: inherit; color: var(--accent); }
 .tower header span { color: var(--tower-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; }
 .scroll { overflow-x: auto; }
 table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
-th { text-align: left; font-weight: 500; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tower-muted); padding: 10px 10px 6px; }
+th { text-align: left; font-weight: 500; font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--tower-muted); padding: 10px 10px 6px; white-space: nowrap; }
 td { padding: 9px 10px; border-top: 1px solid var(--tower-line); white-space: nowrap; }
 td:first-child, th:first-child { padding-left: 16px; }
 td:last-child, th:last-child { padding-right: 16px; text-align: right; }
 .pos { display: inline-grid; place-items: center; width: 22px; height: 22px; background: var(--tower-fg); color: var(--tower-bg); font-weight: 700; }
-.car { font-family: var(--body); font-weight: 600; font-size: 14px; }
-.sec { display: inline-block; width: 26px; height: 8px; margin-right: 3px; }
-.p { background: var(--purple); } .g { background: var(--green); } .y { background: var(--yellow); }
+.who b { display: block; font-family: var(--body); font-weight: 600; font-size: 14px; }
+.who span { display: block; color: var(--tower-muted); font-size: 11px; margin-top: 2px; }
+.who i { font-style: normal; color: var(--hot); font-weight: 700; }
 .tower footer { padding: 10px 16px 14px; border-top: 1px solid var(--tower-line); color: var(--tower-muted); font-size: 11px; display: flex; flex-wrap: wrap; gap: 6px 16px; }
-.key i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; }
 
 /* Kerb */
 .kerb { height: 18px; background: repeating-linear-gradient(-60deg, var(--kerb-a) 0 28px, var(--kerb-b) 28px 56px); }
@@ -114,6 +113,8 @@ dl { margin: 0; }
 .plan li::before { content: "0" counter(lap); display: block; font-family: var(--display); font-style: italic; font-weight: 900; font-size: 56px; line-height: 0.85; color: transparent; -webkit-text-stroke: 1.5px var(--accent); margin-bottom: 8px; }
 .plan li b { font-family: var(--display); font-style: italic; font-size: 26px; font-weight: 900; text-transform: uppercase; line-height: 1.1; display: block; }
 .plan li span { color: var(--muted); font-size: 15px; }
+.plan li.done { border-top-color: var(--hot); }
+.plan li.done::before { content: "0" counter(lap) " ✓"; color: var(--hot); -webkit-text-stroke: 0; }
 
 .foot .wrap { padding-block: 28px 40px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; color: var(--muted); font-size: 14px; }
 
@@ -147,34 +148,33 @@ dl { margin: 0; }
     <div>
       <div class="topline"><div class="roundel" aria-hidden="true">3</div><span class="label">GT3 season companion</span></div>
       <h1>Track<em>side</em></h1>
-      <p class="lede">Follow the GT3 season race by race. See who is quick at each circuit, and find a place to stay near it.</p>
+      <p class="lede">Follow the GT3 season race by race. See which drivers and teams are quick at each circuit, and find a place to stay near it.</p>
       <p>Built on lap-by-lap timing archives and Balance of Performance bulletins from IMSA GTD and GT World Challenge America.</p>
       <div class="links">
-        <span class="chip"><span>App<small>soon</small></span></span>
-        <span class="chip"><span>Grafana<small>soon</small></span></span>
-        <span class="chip"><span>Airflow<small>soon</small></span></span>
+        <span class="chip"><span>App<small>local</small></span></span>
+        <span class="chip"><span>Grafana<small>local</small></span></span>
+        <span class="chip"><span>Airflow<small>local</small></span></span>
         <span class="chip"><span>GitHub<small>soon</small></span></span>
       </div>
     </div>
 
     <div class="tower" role="group" aria-label="Sample pace ranking">
-      <header><strong>Road Atlanta · GTD</strong><span>Sample data</span></header>
+      <header><strong>Road Atlanta · GTD</strong><span>IMSA 2025</span></header>
       <div class="scroll">
         <table>
-          <thead><tr><th>P</th><th>Car model</th><th>Best lap</th><th>Sectors</th><th>Gap</th></tr></thead>
+          <thead><tr><th>P</th><th>Driver</th><th>Best lap</th><th>Race pace</th><th>Gap</th></tr></thead>
           <tbody>
-            <tr><td><span class="pos">1</span></td><td class="car">Model A</td><td>1:19.412</td><td><i class="sec p"></i><i class="sec g"></i><i class="sec g"></i></td><td>—</td></tr>
-            <tr><td><span class="pos">2</span></td><td class="car">Model B</td><td>1:19.538</td><td><i class="sec g"></i><i class="sec p"></i><i class="sec y"></i></td><td>+0.126</td></tr>
-            <tr><td><span class="pos">3</span></td><td class="car">Model C</td><td>1:19.701</td><td><i class="sec g"></i><i class="sec g"></i><i class="sec p"></i></td><td>+0.289</td></tr>
-            <tr><td><span class="pos">4</span></td><td class="car">Model D</td><td>1:19.894</td><td><i class="sec y"></i><i class="sec g"></i><i class="sec g"></i></td><td>+0.482</td></tr>
-            <tr><td><span class="pos">5</span></td><td class="car">Model E</td><td>1:20.067</td><td><i class="sec g"></i><i class="sec y"></i><i class="sec y"></i></td><td>+0.655</td></tr>
+            <tr><td><span class="pos">1</span></td><td class="who"><b>Alessandro Pier Guidi</b><span><i>#21</i> AF Corse · Ferrari</span></td><td>1:19.819</td><td>1:20.408</td><td>—</td></tr>
+            <tr><td><span class="pos">2</span></td><td class="who"><b>Matthew Bell</b><span><i>#13</i> AWA · Corvette</span></td><td>1:20.262</td><td>1:20.495</td><td>+0.087</td></tr>
+            <tr><td><span class="pos">3</span></td><td class="who"><b>Lilou Wadoux Ducellier</b><span><i>#21</i> AF Corse · Ferrari</span></td><td>1:18.821</td><td>1:20.525</td><td>+0.117</td></tr>
+            <tr><td><span class="pos">4</span></td><td class="who"><b>Robby Foley</b><span><i>#96</i> Turner Motorsport · BMW</span></td><td>1:19.804</td><td>1:20.547</td><td>+0.139</td></tr>
+            <tr><td><span class="pos">5</span></td><td class="who"><b>James Calado</b><span><i>#023</i> Triarsi Competizione · Ferrari</span></td><td>1:20.265</td><td>1:20.577</td><td>+0.169</td></tr>
           </tbody>
         </table>
       </div>
       <footer>
-        <span class="key"><i class="p"></i>Best overall</span>
-        <span class="key"><i class="g"></i>Personal best</span>
-        <span class="key"><i class="y"></i>Off the pace</span>
+        <span>Race pace: mean of each driver's 10 fastest green-flag race laps, on their own laps only.</span>
+        <span>Derived from timing data by Al Kamel Systems.</span>
       </footer>
     </div>
   </div>
@@ -186,7 +186,7 @@ dl { margin: 0; }
     <span class="label">The app</span>
     <h2>Pick a race. Plan the weekend.</h2>
     <div class="three">
-      <article><h3>What to watch</h3><p>Pace by car model at this circuit from previous years, and how the Balance of Performance has shifted since the last round.</p></article>
+      <article><h3>What to watch</h3><p>Which drivers and teams are quick at this circuit, ranked on race pace from previous years within their class, with car models and Balance of Performance shifts for context.</p></article>
       <article><h3>Where to stay</h3><p>Sample stays around each circuit with distance to the gate and a nightly price that climbs as race weekend gets closer.</p></article>
       <article><h3>The calendar</h3><p>Every round in one place, re-checked on a schedule because provisional dates move.</p></article>
     </div>
@@ -196,7 +196,7 @@ dl { margin: 0; }
       <div class="stay"><span class="label">Apartment · sleeps 2</span><b>Loft above the old mill</b><div class="row"><span>9.5 km to gate</span><span>$126 / night</span></div></div>
       <div class="stay"><span class="label">House · sleeps 6</span><b>Farmhouse with paddock parking</b><div class="row"><span>14.1 km to gate</span><span>$243 / night</span></div></div>
     </div>
-    <p class="note">Listings, prices, and lap times on this page are generated sample data.</p>
+    <p class="note">Listings and prices are generated sample data. Lap times are real, derived from published timing archives.</p>
   </div>
 </section>
 
@@ -220,10 +220,10 @@ dl { margin: 0; }
   <div class="wrap">
     <span class="label">Run plan</span>
     <h2>Eight stages to the flag</h2>
-    <p class="intro">The project is in planning. Nothing below is built yet.</p>
+    <p class="intro">Stages 1 and 2 are built and run locally on Docker Compose. The triage agent is next; public links arrive with the cloud stage.</p>
     <ol class="plan">
-      <li><b>Calendar and stays</b><span>API, frontend, and database on Docker Compose</span></li>
-      <li><b>Timing pipeline</b><span>Airflow, pace panel, data-quality alerts</span></li>
+      <li class="done"><b>Calendar and stays</b><span>API, frontend, and database on Docker Compose</span></li>
+      <li class="done"><b>Timing pipeline</b><span>Airflow, pace panel by driver, team, and car, data-quality alerts</span></li>
       <li><b>Triage agent</b><span>With fault-injection scenarios</span></li>
       <li><b>Cloud</b><span>Terraform and automated deploys</span></li>
       <li><b>BoP parsing</b><span>Bulletins from a manual inbox</span></li>

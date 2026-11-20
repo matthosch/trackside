@@ -36,10 +36,12 @@ because its columns changed.
 SELECT url, load_error FROM raw.timing_files WHERE load_error IS NOT NULL;
 ```
 Compare the file's header with `LAP_COLUMNS` / `RESULTS_COLUMNS` in `timing.py`.
-After fixing the parser, clear the errors so the next run retries:
-```sql
-UPDATE raw.timing_files SET load_error = NULL WHERE load_error IS NOT NULL;
-```
+Fix the parser, add a test with the new layout, and bump `PARSER_VERSION` in
+`timing.py`. The next run retries the failed files and reprocesses everything
+loaded by the older version; no SQL by hand.
+
+The same applies to any parser fix that changes what lands in staging, even when
+nothing failed: bumping the version is what backfills the corrected data.
 
 **races_without_laps.** A race session exists but has no lap data. Either the
 archive has not published the lap file yet (wait a day), or the lap file's name
