@@ -4,9 +4,10 @@ Follow the GT3 season race by race: see what to watch at each circuit and find a
 stay near it. Trackside is a portfolio project whose real subject is running that app like a
 production service. The full scope and plan are in [docs/scope.md](docs/scope.md).
 
-**Status:** stage 2 of 8. The calendar, sample stays, timing-archive pipeline, pace panel,
-API, frontend, and local observability stack work. The triage agent and cloud deployment
-are not built yet.
+**Status:** stage 3 of 8, in progress. The calendar, sample stays, timing-archive pipeline,
+pace panel, API, frontend, local observability stack, alert routing, and the triage agent
+work. Claude-backed triage needs an API key in `.env`; until then the agent files
+evidence-only reports. Cloud deployment is not built yet.
 
 Stays and prices are generated sample data. Lap-time figures are derived from timing data
 published by Al Kamel Systems; raw timing files are kept private and never redistributed.
@@ -27,6 +28,7 @@ docker compose up -d --build
 | Airflow (no login, local only) | http://localhost:8081 |
 | Grafana (anonymous read-only) | http://localhost:3000 |
 | Prometheus | http://localhost:9090 |
+| Alertmanager | http://localhost:9093 |
 
 On start, the `seed` job applies migrations and loads the calendar and stays. Airflow then
 runs both pipelines once and daily after that:
@@ -79,8 +81,68 @@ Al Kamel archives ──discover──▶ raw.timing_files (manifest)
 | `AirflowSchedulerDown` | The scheduler stops heartbeating |
 | `AirflowDagImportErrors` | A DAG file fails to import |
 
-Runbooks are in [docs/runbooks](docs/runbooks). Alerts show on Prometheus' Alerts page and
-the Grafana dashboards; routing to the triage agent arrives in stage 3.
+| `TriageAgentDown`, `TriageAgentOverBudget` | The agent is unreachable, or has used its monthly Claude budget |
+
+Runbooks are in [docs/runbooks](docs/runbooks). Alertmanager sends every alert to the triage
+agent, grouped per alert, pipeline, and data-quality check.
+
+## Triage agent
+
+```
+Prometheus ─▶ Alertmanager ─▶ agent ─▶ Claude + read-only tools ─▶ report
+                                 │                                    ├─▶ GitHub issue (closed on resolve)
+                                 └── ops.incidents, ops.agent_runs    ├─▶ Discord message
+                                                                      └─▶ outbox (markdown copy)
+```
+
+When an alert group starts firing, the agent (`agent/`) opens an incident, investigates
+with Claude (`claude-opus-5-5`) and seven tools, and files what it found: summary, likely
+cause with a confidence, evidence with the query behind each finding, what it ruled out,
+next steps for a human, and the runbook. When Alertmanager reports the group resolved, it
+comments on and closes the issue.
+
+- **Strictly read-only.** The tools are PromQL and LogQL queries, Airflow run and task-log
+  reads, runbook reads, and SQL as `trackside_readonly`, a role with SELECT-only grants,
+  read-only transactions, and a 5-second statement timeout, so Postgres refuses writes even
+  if the agent tried. The agent writes only its own bookkeeping tables.
+- **Bounded spend.** A monthly budget (`AGENT_MONTHLY_BUDGET_USD`, default $5) is checked
+  before each investigation, a per-incident budget ($1) after every turn, and turns are
+  capped at 15. Every run's tokens and cost are recorded in `ops.agent_runs` and exported as
+  metrics. The system prompt and tools are cached across incidents.
+- **Degrades, never goes silent.** With no API key, over budget, or on an API error, refusal,
+  or unusable output, the agent still files an evidence-only report: the alert, its runbook,
+  and everything else firing. A failing output (GitHub down, say) never blocks the others.
+- **Public-safe reports.** Issues are public, so the prompt forbids lap-level rows and raw
+  file contents; reports cite counts and aggregates.
+
+To turn on each part, set it in `.env` and run `docker compose up -d agent`:
+
+| Setting | Enables |
+|---|---|
+| `ANTHROPIC_API_KEY` | Claude investigations |
+| `GITHUB_TOKEN`, `GITHUB_REPO` | Issues on the repository (fine-grained token, Issues read and write) |
+| `DISCORD_WEBHOOK_URL` | A message per incident and per resolution |
+
+### Fault injection
+
+`faults/inject.py` breaks the local stack on purpose so the whole path can be watched:
+
+| Scenario | What it does | Alert |
+|---|---|---|
+| `api-latency` | Adds latency between the API and Postgres (Toxiproxy) and sends traffic | `ApiSlowRequests` |
+| `api-errors` | Cuts the API's database link and sends traffic | `ApiHighErrorRatio` |
+| `api-down` | Stops the API container | `ApiDown` |
+| `implausible-laps` | Writes impossible lap times into the largest race file and reloads it | `DataQualityCheckFailing` |
+| `missing-laps` | Empties one race's lap file and reloads it | `DataQualityCheckFailing` |
+| `changed-layout` | Renames a column in a lap file, as if the provider changed format | `DataQualityCheckFailing` |
+
+```bash
+python faults/inject.py implausible-laps
+python faults/inject.py clear
+```
+
+`clear` undoes every scenario. Faults for Balance of Performance bulletins and the lap
+stream arrive with stages 5 and 6.
 
 ## Layout
 
@@ -89,8 +151,10 @@ the Grafana dashboards; routing to the triage agent arrives in stage 3.
 | `api/` | Go HTTP API with Prometheus metrics and JSON logs |
 | `web/` | React and TypeScript frontend, served by nginx |
 | `pipelines/` | Python package, Airflow DAGs, and tests |
+| `agent/` | Alert triage agent: webhook service, read-only tools, Claude loop, outputs |
+| `faults/` | Fault-injection scenarios for the local stack |
 | `db/migrations/` | SQL schema, reference data, and marts |
-| `observability/` | Prometheus config and alerts, StatsD mapping, Grafana dashboards, Alloy log shipping |
+| `observability/` | Prometheus config and alerts, Alertmanager routing, Toxiproxy, StatsD mapping, Grafana dashboards, Alloy log shipping |
 | `docs/` | Scope, runbooks, and a draft data-permission request |
 | `landing/` | Static landing page |
 
@@ -114,6 +178,13 @@ cd pipelines && TEST_DATABASE_URL="postgresql://trackside:trackside@127.0.0.1:54
 Use `127.0.0.1`, not `localhost`: on Windows, `localhost` tries IPv6 first and stalls.
 
 ```bash
+cd agent && python -m venv .venv && .venv/Scripts/python -m pip install -e ".[dev]" && .venv/Scripts/python -m pytest
+```
+
+The agent's tests fake Claude, HTTP, and every output, so they need no key or network; its
+store tests use `TEST_DATABASE_URL` like the SQL tests above.
+
+```bash
 cd web && npm install && npm run build
 ```
 
@@ -126,5 +197,8 @@ cd web && npm install && npm run build
 - **Airflow has no login.** Every visitor is an admin, which is acceptable only on localhost.
   Real authentication is needed before stage 4 puts it online.
 - **Raw timing files** sit in a local Docker volume until stage 4 moves them to a private bucket.
+- **`TriageAgentDown` reaches no one:** Alertmanager can only deliver it to the agent that is
+  down. It shows on Prometheus' Alerts page until a second route (direct to Discord) is added.
+- **"Recent deploys"** are service restarts from Prometheus until stage 4 records real deploys.
 - **The seed job's logs** are not in Loki, because it exits before log discovery sees it.
   Use `docker compose logs seed`.

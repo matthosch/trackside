@@ -2,6 +2,9 @@
 name: trackside
 
 x-database-url: &database-url postgres://trackside:${POSTGRES_PASSWORD:-trackside}@db:5432/trackside
+# The API reaches Postgres through Toxiproxy, so fault scenarios can slow or cut
+# that link without touching application code. Pass-through when no fault is set.
+x-api-database-url: &api-database-url postgres://trackside:${POSTGRES_PASSWORD:-trackside}@toxiproxy:5433/trackside
 
 # Shared by every Airflow service. LocalExecutor: no Celery or Redis for one machine.
 x-airflow: &airflow
@@ -65,6 +68,7 @@ services:
     environment:
       DATABASE_URL: *database-url
       SEASON: ${SEASON:-2027}
+      READONLY_DB_PASSWORD: ${READONLY_DB_PASSWORD:-readonly}
     depends_on:
       db:
         condition: service_healthy
@@ -73,12 +77,14 @@ services:
   api:
     build: ./api
     environment:
-      DATABASE_URL: *database-url
+      DATABASE_URL: *api-database-url
     depends_on:
       db:
         condition: service_healthy
       seed:
         condition: service_completed_successfully
+      toxiproxy:
+        condition: service_started
     ports:
       - "127.0.0.1:8000:8000"
     restart: unless-stopped
@@ -171,6 +177,53 @@ services:
     volumes:
       - pushgateway-data:/pushgateway
 
+  # Fault injection between the API and Postgres. Its control API is bound to
+  # localhost for the fault scripts (faults/inject.py).
+  toxiproxy:
+    image: ghcr.io/shopify/toxiproxy:2.9.0
+    command: ["-host=0.0.0.0", "-config=/config/toxiproxy.json"]
+    volumes:
+      - ./observability/toxiproxy.json:/config/toxiproxy.json:ro
+    ports:
+      - "127.0.0.1:8474:8474"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml", "--storage.path=/alertmanager"]
+    volumes:
+      - ./observability/alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    ports:
+      - "127.0.0.1:9093:9093"
+    restart: unless-stopped
+
+  # Investigates each alert with read-only tools; files a GitHub issue and a
+  # Discord message when their credentials are set in .env.
+  agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    environment:
+      DATABASE_URL: *database-url
+      READONLY_DATABASE_URL: postgres://trackside_readonly:${READONLY_DB_PASSWORD:-readonly}@db:5432/trackside
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      AGENT_MONTHLY_BUDGET_USD: ${AGENT_MONTHLY_BUDGET_USD:-5}
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_REPO: ${GITHUB_REPO:-}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    volumes:
+      # Mounted so runbook edits reach the agent without a rebuild.
+      - ./docs/runbooks:/app/docs/runbooks:ro
+      - agent-outbox:/outbox
+    depends_on:
+      seed:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
   prometheus:
     image: prom/prometheus:v3.0.0
     volumes:
@@ -226,3 +279,6 @@ volumes:
   prometheus-data:
   pushgateway-data:
   loki-data:
+  alertmanager-data:
+  # Markdown copy of every incident report.
+  agent-outbox:

@@ -1,5 +1,5 @@
-# Alerts for the API service level. Routing to Alertmanager and the triage
-# agent arrives in stage 3; until then these show on Prometheus' Alerts page.
+# Alert rules. Alertmanager routes every alert to the triage agent
+# (observability/alertmanager.yml); each names the runbook the agent starts from.
 groups:
   - name: api
     rules:
@@ -10,6 +10,7 @@ groups:
           severity: page
         annotations:
           summary: The Trackside API is not answering scrapes.
+          runbook: docs/runbooks/api.md
 
       - alert: ApiHighErrorRatio
         expr: |
@@ -20,6 +21,7 @@ groups:
           severity: page
         annotations:
           summary: More than 5% of API requests are failing with a server error.
+          runbook: docs/runbooks/api.md
 
       - alert: ApiSlowRequests
         expr: |
@@ -31,6 +33,7 @@ groups:
           severity: ticket
         annotations:
           summary: API p95 latency has been above 500 ms for 10 minutes.
+          runbook: docs/runbooks/api.md
 
   - name: pipelines
     rules:
@@ -90,3 +93,25 @@ groups:
         annotations:
           summary: "{{ $value }} DAG files fail to import, so their pipelines will not run."
           runbook: docs/runbooks/pipeline-stale.md
+
+  - name: triage
+    rules:
+      # The agent cannot triage its own outage: Alertmanager's delivery to it
+      # fails too. This shows on Prometheus' Alerts page and in Alertmanager's UI.
+      - alert: TriageAgentDown
+        expr: up{job="agent"} == 0
+        for: 5m
+        labels:
+          severity: ticket
+        annotations:
+          summary: The triage agent is not answering scrapes, so alerts are not being triaged.
+          runbook: docs/runbooks/triage-agent.md
+
+      - alert: TriageAgentOverBudget
+        expr: trackside_agent_month_spend_usd >= trackside_agent_month_budget_usd
+        for: 5m
+        labels:
+          severity: ticket
+        annotations:
+          summary: The triage agent has used its monthly API budget; incidents get evidence-only reports until next month.
+          runbook: docs/runbooks/triage-agent.md

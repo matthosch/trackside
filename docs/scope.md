@@ -1,6 +1,6 @@
 # Trackside: project scope
 
-Agreed 2026-11-16. Status: planning; nothing is built yet.
+Agreed 2026-11-16. Status (2026-11-19): stages 1 and 2 built; stage 3 in progress.
 
 ## Purpose
 
@@ -61,12 +61,14 @@ access).
 - Claude via the Anthropic API, triggered by an Alertmanager webhook to a small Python service.
 - Strictly read-only. Tools: query Prometheus, query Loki, list recent deploys, read Airflow
   task state, search runbooks. It takes no remediation actions.
-- Output: a Jira ticket with a root-cause suggestion, evidence, and a runbook link, plus a
-  chat notification (Slack if a personal workspace exists, otherwise Discord).
+- Output: a GitHub issue on the public repository (chosen over Jira on 2026-11-19 so
+  incidents are visible to anyone reading the repo) with a root-cause suggestion, evidence,
+  and a runbook link, plus a Discord message. Issues close when the alert resolves.
 - A monthly spend cap of a few dollars.
 - Demoed with a fault-injection script: missing session in a timing CSV, changed BoP PDF
   layout, lap times outside plausible bounds, stalled stream, API latency spike. One scenario
-  gets a written postmortem.
+  gets a written postmortem. The BoP and stream scenarios wait for stages 5 and 6; a changed
+  timing-file layout stands in for the BoP one meanwhile.
 
 ## Service levels
 

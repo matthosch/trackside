@@ -12,7 +12,7 @@ from pathlib import Path
 
 import psycopg
 
-from . import sro_calendar, stays
+from . import readonly_role, sro_calendar, stays
 from .migrate import migrate
 
 log = logging.getLogger("trackside.seed")
@@ -27,6 +27,7 @@ def main() -> int:
 
     with psycopg.connect(os.environ["DATABASE_URL"]) as conn:
         migrate(conn, args.migrations)
+        readonly_role.ensure(conn, os.environ.get("READONLY_DB_PASSWORD", "readonly"))
 
         failures = 0
         for series_id, calendar_url in conn.execute("SELECT id, calendar_url FROM series").fetchall():

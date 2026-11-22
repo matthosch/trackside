@@ -1,0 +1,19 @@
+# Every alert goes to the triage agent, which investigates once per alert group
+# and files the ticket and chat message itself.
+route:
+  receiver: triage-agent
+  # One incident per alert, per pipeline or data-quality check where those apply.
+  group_by: [alertname, pipeline, check]
+  # Wait for related alerts to arrive before the first notification.
+  group_wait: 30s
+  group_interval: 5m
+  # The agent ignores repeats of an open incident; this only re-sends the state.
+  repeat_interval: 12h
+
+receivers:
+  - name: triage-agent
+    webhook_configs:
+      - url: http://agent:8090/alerts
+        send_resolved: true
+        # The agent answers at once and investigates in the background.
+        timeout: 10s
